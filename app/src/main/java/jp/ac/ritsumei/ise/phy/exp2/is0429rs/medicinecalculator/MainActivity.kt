@@ -3,13 +3,15 @@ package jp.ac.ritsumei.ise.phy.exp2.is0429rs.medicinecalculator
 import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.text.Editable
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.*
+import kotlinx.serialization.cbor.Cbor.Companion.context
 import java.util.ArrayList
 
 
@@ -17,9 +19,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var helper: MedicineDataOpenHelper ;
 
-    var mValues = arrayOfNulls<Double>(20); //薬ごとに計算し終えた値を保存しておく配列
-    var mValuesUpdate : Int = 0;    //mValuesの位置を移動させるための数
-    var mValueTime : Double? = 0.0;  //一時的に薬の計算を行うための数
+    var medicineValues = arrayOfNulls<Double>(20); //薬ごとに計算し終えた値を保存しておく配列
+    var medicineValuesUpdate : Int = 0;    //medicineValuesの位置を移動させるための数
+    var medicineValueTime : Double? = 0.0;  //一時的に薬の計算を行うための数
     var day : Int = 0;  //日数
     var lastValue : Double? = 0.0;   //合計の値
 
@@ -52,101 +54,129 @@ class MainActivity : AppCompatActivity() {
         
         /*スピナーの設定*/
         val spinner: Spinner = findViewById(R.id.spinner)
-        if (medicineNameData() != null) {
-            setAdapter(spinner, medicineNameData())
+        if (medicineData() != null) {
+            setAdapter(spinner, medicineData().map { it.medicineName })
         } else {
             /*登録されているデータがない場合の処理-----------------
 
             ------------------------------------------------------*/
         }
 
+        //リスナを登録
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            //アイテムが選択されたとき
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val spinnerParent = parent as Spinner
+                val medicineNameItem = spinnerParent.selectedItem as String
+                var i = 0;
+                while (medicineNameData()[i] != medicineNameItem) {
+                    i++
+                }
+
+                 medicineValueTime = medicineValueData()[i].toDouble()
+            }
+
+            //アイテムが選択されなかったとき
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+
         /*日数に関する設定*/
         SID.setOnClickListener {
-            mValueTime = mValueTime!! * 1;
+            medicineValueTime = medicineValueTime!! * 1;
         }
 
         BID.setOnClickListener {
-            mValueTime = mValueTime!! * 2;
+            medicineValueTime = medicineValueTime!! * 2;
         }
 
         QID.setOnClickListener {
             if(day%2 == 0) {
-                mValueTime = mValueTime!! * 1/2;
+                medicineValueTime = medicineValueTime!! * 1/2;
             } else {
                 day += 1;
-                mValueTime = mValueTime!! * 1/2;
+                medicineValueTime = medicineValueTime!! * 1/2;
             }
         }
 
         TID.setOnClickListener {
             if (day%3 == 0) {
-                mValueTime = mValueTime!! * 1/3;
+                medicineValueTime = medicineValueTime!! * 1/3;
             }else if(day%3 == 1) {
                 day += 2;
-                mValueTime = mValueTime!! * 1/3;
+                medicineValueTime = medicineValueTime!! * 1/3;
             } else {
                 day += 1;
-                mValueTime = mValueTime!! * 1/3;
+                medicineValueTime = medicineValueTime!! * 1/3;
             }
 
         }
 
         /*錠数に関する設定*/
         oeT.setOnClickListener {
-            mValueTime = mValueTime!! * 1/8;
+            medicineValueTime = medicineValueTime!! * 1/4;  //1/8 convert 1/4
         }
 
         ofT.setOnClickListener {
-            mValueTime = mValueTime!! * 1/4;
+            medicineValueTime = medicineValueTime!! * 1/4;
         }
 
         otT.setOnClickListener {
-            mValueTime = mValueTime!! * 1/2;
+            medicineValueTime = medicineValueTime!! * 1/2;
         }
 
         oneT.setOnClickListener {
-            mValueTime = mValueTime!! * 1;
+            medicineValueTime = medicineValueTime!! * 1;
         }
 
         twoT.setOnClickListener {
-            mValueTime = mValueTime!! * 2;
+            medicineValueTime = medicineValueTime!! * 2;
         }
 
         threeT.setOnClickListener {
-            mValueTime = mValueTime!! * 3;
+            medicineValueTime = medicineValueTime!! * 3;
         }
 
         /*日数に関する設定*/
         val editText = findViewById<EditText>(R.id.daysValue);
-        val str : Editable = editText.getText()
+        val str : Editable = editText.text;
 
         decision.setOnClickListener {
             day = day + Integer.parseInt(str.toString());
-            mValueTime = mValueTime!! * day;
+            medicineValueTime = medicineValueTime!! * day;
         }
 
         /*演算に関する設定*/
         delete.setOnClickListener {
-            mValueTime = 0.0;
+            /*
+            * 選択されたラジオボタン、ボタンをすべて外す処理
+            * */
+            medicineValueTime = 0.0;
         }
 
         allclear.setOnClickListener {
-            for (i in 0..mValues.size) {
-                mValues[i] = 0.0;
+            for (i in 0..medicineValues.size) {
+                medicineValues[i] = 0.0;
             }
         }
 
         add.setOnClickListener {
-            mValues[mValuesUpdate] = mValueTime;    //計算後の値を配列に格納
+            medicineValues[medicineValuesUpdate] = medicineValueTime;    //計算後の値を配列に格納
             val messageView : TextView = findViewById(R.id.unitvalue)
-            messageView.text = mValueTime.toString()
+            messageView.text = medicineValueTime.toString()     //単価に値段を表示
 
-            mValuesUpdate += 1; //配列格納後にポインタを1ずらす
-            mValueTime = 0.0;   //薬の値段を0にリセットする
+            /*
+            * 選択されたラジオボタン、ボタンをすべて外す処理
+            * */
+
+            medicineValuesUpdate += 1; //配列格納後にポインタを1ずらす
+            medicineValueTime = 0.0;   //薬の値段を0にリセットする
         }
 
         equal.setOnClickListener {
-            lastValue.sum(mValues)
+            lastValue.sum(medicineValues)
             val messageView2 : TextView = findViewById(R.id.addvalue)
             messageView2.text = lastValue.toString()
         }
@@ -179,31 +209,15 @@ class MainActivity : AppCompatActivity() {
         return medicineList
     }
 
-    /* DBからデータをすべて取得し薬の名前を配列にして返す*/
-    fun medicineNameData(): ArrayList<String> {
-        val db: SQLiteDatabase = helper.readableDatabase;
-        val cursor: Cursor = db.query(
-            "testdb",
-            arrayOf("medicine", "value", "kind"),
-            null,
-            null,
-            null,
-            null,
-            null
-        )
 
-        cursor.moveToFirst()
-
-        val medicineNameList = arrayListOf<String>();
-
-        for (i in 1..cursor.count) {
-            medicineNameList.add(cursor.getString(0))
-            cursor.moveToNext()
-        }
-
-        cursor.close()
-
+    fun medicineNameData() : List<String> {
+        val medicineNameList = medicineData().map { it.medicineName }
         return medicineNameList
+    }
+
+    fun medicineValueData() : List<Int> {
+        val medicineValueList = medicineData().map { it.medicineValue }
+        return medicineValueList
     }
 
 
