@@ -92,27 +92,27 @@
                     android:inputType="number"
                     android:ems="10"
                     android:id="@+id/simpleValue"
-                    android:hint="単価を入力してください" style="@style/Widget.AppCompat.EditText"/>
+                    android:hint="値を入力してください" style="@style/Widget.AppCompat.EditText" android:layout_weight="1"/>
             <RadioGroup
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal" android:id="@+id/medKindRadioGroup">
+                    android:orientation="horizontal" android:id="@+id/medKindRadioGroup" android:layout_weight="1">
                 <RadioButton
                         android:text="錠剤"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/tablet" android:layout_weight="1"
+                        android:layout_height="match_parent" android:id="@+id/tablet" android:layout_weight="1"
                         android:textColor="@android:color/holo_orange_light"
                         android:buttonTint="@android:color/holo_orange_light"/>
                 <RadioButton
                         android:text="粉薬"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/powder" android:layout_weight="1"
+                        android:layout_height="match_parent" android:id="@+id/powder" android:layout_weight="1"
                         android:textColor="@android:color/holo_blue_dark"
                         android:buttonTint="@android:color/holo_blue_dark"/>
                 <RadioButton
                         android:text="液体"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/liquid" android:layout_weight="1"
+                        android:layout_height="match_parent" android:id="@+id/liquid" android:layout_weight="1"
                         android:textColor="@android:color/holo_red_dark"
                         android:buttonTint="@android:color/holo_red_dark"/>
             </RadioGroup>
@@ -136,7 +136,7 @@
                     android:text="登録"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/regist" android:layout_weight="1"
-                    android:onClick="saveData"/>
+            />
             <Space
                     android:layout_width="50dp"
                     android:layout_height="wrap_content" android:layout_weight="1"/>
@@ -185,23 +185,23 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:layout_weight="1">
+                    android:layout_weight="1" android:id="@+id/medKindRadioGroup2">
                 <RadioButton
                         android:text="錠剤"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/tablet2" android:layout_weight="1"
+                        android:layout_height="match_parent" android:id="@+id/tablet2" android:layout_weight="1"
                         android:textColor="@android:color/holo_orange_light"
                         android:buttonTint="@android:color/holo_orange_light"/>
                 <RadioButton
                         android:text="粉薬"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/powder2" android:layout_weight="1"
+                        android:layout_height="45dp" android:id="@+id/powder2" android:layout_weight="1"
                         android:textColor="@android:color/holo_blue_dark"
                         android:buttonTint="@android:color/holo_blue_dark"/>
                 <RadioButton
                         android:text="液体"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/liquid2" android:layout_weight="1"
+                        android:layout_height="45dp" android:id="@+id/liquid2" android:layout_weight="1"
                         android:textColor="@android:color/holo_red_dark"
                         android:buttonTint="@android:color/holo_red_dark"/>
             </RadioGroup>

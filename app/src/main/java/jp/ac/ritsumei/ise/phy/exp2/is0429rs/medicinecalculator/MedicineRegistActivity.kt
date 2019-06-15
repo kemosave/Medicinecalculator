@@ -7,11 +7,13 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import kotlinx.android.synthetic.main.activity_medicine_regist.*
+import java.lang.Exception
 
 
 class MedicineRegistActivity : AppCompatActivity() {
@@ -49,88 +51,36 @@ class MedicineRegistActivity : AppCompatActivity() {
         /*have not written yet. ----------------------------------------------------------------------------
 
        ---------------------------------------------------------------------------------------------------*/
-    }
 
-    /* DBからデータをすべて取得し薬の名前を配列にして返す*/
-    fun medicineNameData(): ArrayList<String> {
-        val db: SQLiteDatabase = helper.readableDatabase;
-        val cursor: Cursor = db.query(
-            "testdb",
-            arrayOf("medicine", "value", "kind"),
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        /*新規登録の設定*/
+        //リセットが押されたときの処理
+        clear.setOnClickListener {
+            val editText_medNameValue: EditText = findViewById(R.id.medNameValue);
+            val editText_simpleValue: EditText = findViewById(R.id.simpleValue);
+            val radioGroup_medKind: RadioGroup = findViewById(R.id.medKindRadioGroup);
 
-        cursor.moveToFirst()
-
-        val medicineNameList = arrayListOf<String>();
-
-        for (i in 1..cursor.count) {
-            medicineNameList.add(cursor.getString(0))
-            cursor.moveToNext()
+            clear_mdicineInfo(editText_medNameValue)
+            clear_mdicineInfo(editText_simpleValue)
+            clearCheck_medicimeKind(radioGroup_medKind)
         }
 
-        cursor.close()
-
-        return medicineNameList
-    }
-
-    /* DBからデータをすべて取得し薬の値段を配列にして返す*/
-    fun medicineValueData(): ArrayList<Int> {
-        val db: SQLiteDatabase = helper.readableDatabase;
-        val cursor: Cursor = db.query(
-            "testdb",
-            arrayOf("medicine", "value", "kind"),
-            null,
-            null,
-            null,
-            null,
-            null
-        )
-
-        cursor.moveToFirst()
-
-        val medicineValueList = arrayListOf<Int>();
-
-        for (i in 1..cursor.count) {
-            medicineValueList.add(cursor.getInt(1))
-            cursor.moveToNext()
+        //登録が押されたときの処理
+        regist.setOnClickListener {
+            try {
+                saveData(it)
+            } catch (e: Exception) {
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this);
+                builder.setMessage("入力不備があります" + "\n" + "薬の名前、単価、種類を入力後に[登録]を押してください")
+                builder.setTitle("警告")
+                builder.setPositiveButton("OK",null)
+                builder.show()
+            }
         }
 
-        cursor.close()
 
-        return medicineValueList
     }
 
-    /* DBからデータをすべて取得し薬の種類を配列にして返す*/
-    fun medicineKindData(): ArrayList<String> {
-        val db: SQLiteDatabase = helper.readableDatabase;
-        val cursor: Cursor = db.query(
-            "testdb",
-            arrayOf("medicine", "value", "kind"),
-            null,
-            null,
-            null,
-            null,
-            null
-        )
 
-        cursor.moveToFirst()
-
-        val medicineKindList = arrayListOf<String>();
-
-        for (i in 1..cursor.count) {
-            medicineKindList.add(cursor.getString(2))
-            cursor.moveToNext()
-        }
-
-        cursor.close()
-
-        return medicineKindList
-    }
 
     /**
      *データを保存する
@@ -143,11 +93,11 @@ class MedicineRegistActivity : AppCompatActivity() {
         //薬の名前と値段を取得
         val medNameValue = findViewById<EditText>(R.id.medNameValue)  as EditText   //薬の名前を受け取る
         val medValue = findViewById<EditText>(R.id.simpleValue) as EditText //薬の値段を受け取る
+
         //薬の種類を取得・ラジオボタンに関する変数
         val radioGroup_medKind : RadioGroup = findViewById(R.id.medKindRadioGroup)  //薬の種類のラジオボタン
         val radioId = radioGroup_medKind.checkedRadioButtonId;
-        val medKindValue: RadioButton = radioGroup_medKind.findViewById<RadioButton>(radioId);
-        //val index = radioGroup.indexOfChild(radioButton);
+        val medKindValue: RadioButton = radioGroup_medKind.findViewById(radioId);
 
         //表示させる形式に変数を変換
         val medicine: String = medNameValue.text.toString();
@@ -161,36 +111,6 @@ class MedicineRegistActivity : AppCompatActivity() {
         db.insertOrThrow("testdb", null, values)
     }
 
-    /*/*登録ボタンが押されたときに呼ばれる関数*/
-    fun registButton_isTriger() {
-        //薬の名前と値段を取得
-        val medNameValue = findViewById<EditText>(R.id.medNameValue)  as EditText   //薬の名前を受け取る
-        val medValue = findViewById<EditText>(R.id.simpleValue) as EditText //薬の値段を受け取る
-        //薬の種類を取得・ラジオボタンに関する変数
-        val radioGroup_medKind : RadioGroup = findViewById(R.id.medKindRadioGroup)  //薬の種類のラジオボタン
-        val radioId = radioGroup_medKind.checkedRadioButtonId;
-        val medKindValue: RadioButton = radioGroup_medKind.findViewById<RadioButton>(radioId);
-
-        //登録ボタンが押されたときの処理
-        regist.setOnClickListener {
-            //EditTextのテキストの取得
-            if (medNameValue.text != null && medValue.text != null && medKindValue != null) {   //テキストが入力された状態であるとき
-                saveData(regist)
-                medNameValue.getEditableText().clear()      //EditTextを空にする
-                medValue.getEditableText().clear()
-                radioGroup_medKind.clearCheck()     //ラジオボタンの選択を外す
-            } else {
-                if (medNameValue.text == null) {
-                    medNameValue.setError("名前を入力してください")
-                }
-                if (medValue.text == null) {
-                    medValue.setError("単価を入力してください")
-                }
-                if (medKindValue == null) {
-                }
-            }
-        }
-    }*/
 
     /*薬の種類を返す関数*/
     fun medKindText() : String {
@@ -208,7 +128,15 @@ class MedicineRegistActivity : AppCompatActivity() {
         return medKindName
     }
 
+    /*薬の種類ラジオボタンのチェックを外す関数*/
+    fun clearCheck_medicimeKind (radioGroup: RadioGroup) {
+        radioGroup.clearCheck()
+    }
 
+    /*入力されたテキストを空にする関数*/
+    fun clear_mdicineInfo(edittext: EditText) {
+        edittext.editableText.clear()
+    }
 }
 
 

@@ -86,15 +86,21 @@
                         android:layout_height="match_parent" android:id="@+id/BID" android:layout_weight="1"
                         android:buttonTint="@android:color/holo_blue_light"/>
                 <RadioButton
+                        android:text="TID"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" android:id="@+id/TID" android:layout_weight="1"
+                        android:buttonTint="@android:color/holo_purple"/>
+                <RadioButton
                         android:text="QID"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" android:id="@+id/QID" android:layout_weight="1"
                         android:buttonTint="@android:color/holo_red_light"/>
+
                 <RadioButton
                         android:text="3日に1回"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" android:id="@+id/TID" android:layout_weight="1"
-                        android:buttonTint="@android:color/holo_purple"/>
+                        android:layout_height="match_parent" android:id="@+id/OTD" android:layout_weight="1"
+                        android:buttonTint="@android:color/holo_orange_dark"/>
             </RadioGroup>
         </LinearLayout>
         <LinearLayout
@@ -200,7 +206,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:id="@+id/unitprice"/>
                 <TextView
-                        android:text="TextView"
+                        android:text="0"
                         android:layout_width="match_parent"
                         android:layout_height="35dp" android:id="@+id/unitvalue"/>
                 <TextView
@@ -208,9 +214,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="35dp" android:id="@+id/addprice"/>
                 <TextView
-                        android:text="TextView"
+                        android:text="0"
                         android:layout_width="match_parent"
-                        android:layout_height="35dp" android:id="@+id/addvalue"/>
+                        android:layout_height="50dp" android:id="@+id/addvalue"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
