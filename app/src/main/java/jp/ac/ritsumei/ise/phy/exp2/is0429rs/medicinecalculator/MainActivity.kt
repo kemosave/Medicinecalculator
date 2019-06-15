@@ -1,5 +1,6 @@
 package jp.ac.ritsumei.ise.phy.exp2.is0429rs.medicinecalculator
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -7,13 +8,11 @@ import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.text.Editable
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.*
 import java.lang.Exception
 import android.widget.RadioGroup
-
 
 
 
@@ -25,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     var medicineValueTime : Double = 0.0;  //一時的に薬の計算を行うための数
     var lastValue : Double = 0.0;   //合計の値
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -54,13 +54,7 @@ class MainActivity : AppCompatActivity() {
         
         /*スピナーの設定*/
         val spinner: Spinner = findViewById<View>(R.id.spinner) as Spinner;
-        if (medicineData() != null) {
-            setAdapter(spinner, medicineData().map { it.medicineName })
-        } else {
-            /*登録されているデータがない場合の処理-----------------
-
-            ------------------------------------------------------*/
-        }
+        setAdapter(spinner, medicineData().map { it.medicineName })
 
         //リスナを登録
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
@@ -73,27 +67,24 @@ class MainActivity : AppCompatActivity() {
                     i++
                 }
 
-                 medicineValueTime = medicineValueData()[i].toDouble()
+                 medicineValueTime = medicineValueData()[i].toDouble();     //スピナで選択した薬名から値段を取得
             }
 
             //アイテムが選択されなかったとき
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) { }
         }
 
 
-        /*日数に関する設定*/
+        /*使用回数に関する設定*/
         SID.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 1;
             try {
+                //先に日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
                 medicineValueTime = medicineValueTime!! * alternative_decision(-1, daysInt);
-            } catch (e: Exception) {
-
-            }
+            } catch (e: Exception) { }
 
             //ボタン設定
             radioButtonDisnabled_medcineTimes()
@@ -102,13 +93,12 @@ class MainActivity : AppCompatActivity() {
         BID.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 2;
             try {
+                //先に日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
                 medicineValueTime = medicineValueTime!! * alternative_decision(-1, daysInt);
-            } catch (e: Exception) {
-
-            }
+            } catch (e: Exception) { }
 
             //ボタン設定
             radioButtonDisnabled_medcineTimes()
@@ -117,13 +107,12 @@ class MainActivity : AppCompatActivity() {
         TID.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 3;
             try {
+                //先に日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
                 medicineValueTime = medicineValueTime!! * alternative_decision(-1, daysInt);
-            } catch (e: Exception) {
-
-            }
+            } catch (e: Exception) { }
 
             //ボタン設定
             radioButtonDisnabled_medcineTimes()
@@ -131,6 +120,7 @@ class MainActivity : AppCompatActivity() {
 
         QID.setOnClickListener {
             try {
+                //先に日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
@@ -139,12 +129,10 @@ class MainActivity : AppCompatActivity() {
                     0;
                 } else {
                     1;
-                }
+                }   //奇数の日数は切り上げる
 
                 medicineValueTime = medicineValueTime!! * alternative_decision(flagQID, daysInt);
-            } catch (e: Exception) {
-
-            }
+            } catch (e: Exception) { }
 
             //ボタン設定
             radioButtonDisnabled_medcineTimes()
@@ -152,6 +140,7 @@ class MainActivity : AppCompatActivity() {
 
         OTD.setOnClickListener {
             try {
+                //先に日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
@@ -160,27 +149,29 @@ class MainActivity : AppCompatActivity() {
                     Integer.parseInt(daysStr) % 3 == 0 -> 2
                     Integer.parseInt(daysStr) % 3 == 1 -> 3
                     else -> 4
-                }
-                medicineValueTime = medicineValueTime!! * alternative_decision(flagOTD, daysInt);
-            }catch (e: Exception){
+                }   //余りは切り上げる
 
-            }
+                medicineValueTime = medicineValueTime!! * alternative_decision(flagOTD, daysInt);
+            }catch (e: Exception){ }
 
             //ボタン設定
             radioButtonDisnabled_medcineTimes()
         }
 
+
         /*錠数に関する設定*/
         oeT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 1/4;  //1/8 convert 1/4
 
+            //ボタン設定
             val button_oeT: Button = findViewById(R.id.oeT);    // 1/8
             buttonDisnabled_tabs(button_oeT)
-
         }
 
         ofT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 1/4;
+
+            //ボタン設定
             val button_ofT: Button = findViewById(R.id.ofT);    // 1/4
             buttonDisnabled_tabs(button_ofT)
         }
@@ -188,6 +179,7 @@ class MainActivity : AppCompatActivity() {
         otT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 1/2;
 
+            //ボタン設定
             val button_otT: Button = findViewById(R.id.otT);    // 1/2
             buttonDisnabled_tabs(button_otT)
         }
@@ -195,6 +187,7 @@ class MainActivity : AppCompatActivity() {
         oneT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 1;
 
+            //ボタン設定
             val button_oneT: Button = findViewById(R.id.oneT);  // 1
             buttonDisnabled_tabs(button_oneT)
         }
@@ -202,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         twoT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 2;
 
+            //ボタン設定
             val button_twoT: Button = findViewById(R.id.twoT);  // 2
             buttonDisnabled_tabs(button_twoT)
         }
@@ -209,13 +203,16 @@ class MainActivity : AppCompatActivity() {
         threeT.setOnClickListener {
             medicineValueTime = medicineValueTime!! * 3;
 
+            //ボタン設定
             val button_threeT: Button = findViewById(R.id.threeT);  // 3
             buttonDisnabled_tabs(button_threeT)
         }
 
+
         /*日数に関する設定*/
         decision.setOnClickListener {
             try {
+                //先に使用日数が入力されたときの処理
                 val editText: EditText = findViewById(R.id.daysValue);
                 val daysStr: String = editText.text.toString();
                 val daysInt: Int = Integer.parseInt(daysStr);
@@ -224,22 +221,23 @@ class MainActivity : AppCompatActivity() {
                     0;
                 } else {
                     1;
-                }
+                }   //余りは切り上げ
 
                 val flagDecision_OTD = when {
                     Integer.parseInt(daysStr) % 3 == 0 -> 2
                     Integer.parseInt(daysStr) % 3 == 1 -> 3
                     else -> 4
-                }
+                }   //余りは切り上げ
 
                 //ボタン設定
                 buttonDisnabled_decision()
 
+                //ボタンの使用可否で変数代入を判断
                 medicineValueTime = medicineValueTime!! * alternative_decision(-1, daysInt);
                 medicineValueTime = medicineValueTime!! * alternative_decision(flagDecision_QID, daysInt);
                 medicineValueTime = medicineValueTime!! * alternative_decision(flagDecision_OTD, daysInt);
-
             } catch (e: Exception) {
+                //日数が空の状態[決定]が押されたときの処理
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this);
                 builder.setMessage("先に日数を入力してください")
                 builder.setTitle("警告")
@@ -248,10 +246,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         /*演算に関する設定*/
         delete.setOnClickListener {
             medicineValueTime = medicineValueData()[spinnerCount()].toDouble();   //薬の値段を初期値にリセットする
 
+            //表示テキストをクリア
             val messageView: TextView = findViewById(R.id.unitvalue);
             messageView.text = "0";
 
@@ -262,8 +262,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         allclear.setOnClickListener {
-            medicineValues.clear()
+            medicineValues.clear()  //List内の要素を全削除
 
+            //表示テキストをクリア
             val messageView: TextView = findViewById(R.id.unitvalue);
             val messageView2: TextView = findViewById(R.id.addvalue);
             messageView.text = "0";
@@ -277,6 +278,7 @@ class MainActivity : AppCompatActivity() {
 
         add.setOnClickListener {
             if (!flag_tabs() && !flag_medcineTimes() && !flag_decision()) {
+                //使用日数、錠剤数、日数がすべて入力されているときの処理
                 medicineValues.add(medicineValueTime);    //計算後の値を配列に格納
                 val messageView: TextView = findViewById(R.id.unitvalue)
                 messageView.text = medicineValueTime.toString()     //単価に値段を表示
@@ -287,8 +289,8 @@ class MainActivity : AppCompatActivity() {
                 buttonEnabled_operator()
                 clearCheck_mdicineTimes()
                 clear_daysValue()
-
             } else {
+                //使用日数、錠剤数、日数のいずれかに入力不備があったときの処理
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this);
                 builder.setMessage("入力不備があります" + "\n" + "錠剤数、使用回数、日数を入力後に[+]を押してください")
                 builder.setTitle("警告")
@@ -299,9 +301,9 @@ class MainActivity : AppCompatActivity() {
 
         equal.setOnClickListener {
             lastValue = sum();
-            val lastValue_round = kotlin.math.round(lastValue / 100) * 100;
+            val lastValue_ceil = kotlin.math.ceil(lastValue / 100) * 100;
             val messageView2: TextView = findViewById(R.id.addvalue)
-            messageView2.text = "$lastValue → $lastValue_round";
+            messageView2.text = "$lastValue → $lastValue_ceil";    //最終計算結果と十の位切り上げ結果を表示する
 
             //ボタン設定
             buttonEnabled_operator()
@@ -315,7 +317,7 @@ class MainActivity : AppCompatActivity() {
     以下その他関数
      */
 
-    /* DBからデータをすべて取得し薬のデータを配列にして返す*/
+    /* DBからデータをすべて取得し薬のデータを配列にして返す関数*/
     private fun medicineData(): List<MedicineAllData> {
         val db: SQLiteDatabase = helper.readableDatabase;
         val cursor: Cursor = db.query(
