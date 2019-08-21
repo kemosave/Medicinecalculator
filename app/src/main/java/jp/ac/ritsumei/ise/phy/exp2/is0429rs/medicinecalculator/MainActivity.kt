@@ -576,9 +576,8 @@ class MainActivity : AppCompatActivity() {
 }
 
 
-
-
 class MedicineAllData(val medicineName: String, val medicineValue: Int, val medicineKind: String)
+
 
 
 

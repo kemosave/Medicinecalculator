@@ -9,9 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.view.View
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.widget.*
 import kotlinx.android.synthetic.main.activity_medicine_regist.*
 import java.lang.Exception
 
@@ -48,9 +46,33 @@ class MedicineRegistActivity : AppCompatActivity() {
 
 
         /*薬の既存変更に関する設定*/
-        /*have not written yet. ----------------------------------------------------------------------------
+        /*スピナーの設定*/
+        val spinner2: Spinner = findViewById<View>(R.id.spinner2) as Spinner;
+        setAdapter(spinner2, medicineData_forRegist().map { it.medicineName })
 
-       ---------------------------------------------------------------------------------------------------*/
+        //リセットが押されたときの処理
+        clear2.setOnClickListener {
+            val editText_simpleValue: EditText = findViewById(R.id.reValue);
+            val radioGroup_medKind: RadioGroup = findViewById(R.id.medKindRadioGroup2);
+
+            clear_mdicineInfo(editText_simpleValue)
+            clearCheck_medicimeKind(radioGroup_medKind)
+        }
+
+        //完全削除が押されたときの処理
+        delete2.setOnClickListener {
+            try {
+                deleteData(it)
+            } catch(e: Exception) {
+
+            }
+        }
+
+        //登録が押されたときの処理
+        regist2.setOnClickListener {
+
+        }
+
 
         /*新規登録の設定*/
         //リセットが押されたときの処理
@@ -68,6 +90,15 @@ class MedicineRegistActivity : AppCompatActivity() {
         regist.setOnClickListener {
             try {
                 saveData(it)
+
+                //登録後に入力内容をクリアする
+                val editText_medNameValue: EditText = findViewById(R.id.medNameValue);
+                val editText_simpleValue: EditText = findViewById(R.id.simpleValue);
+                val radioGroup_medKind: RadioGroup = findViewById(R.id.medKindRadioGroup);
+
+                clear_mdicineInfo(editText_medNameValue)
+                clear_mdicineInfo(editText_simpleValue)
+                clearCheck_medicimeKind(radioGroup_medKind)
             } catch (e: Exception) {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this);
                 builder.setMessage("入力不備があります" + "\n" + "薬の名前、単価、種類を入力後に[登録]を押してください")
@@ -111,6 +142,19 @@ class MedicineRegistActivity : AppCompatActivity() {
         db.insertOrThrow("testdb", null, values)
     }
 
+    /**
+    データを削除する
+    * @param view
+    * */
+    fun deleteData(view: View) {
+        val db: SQLiteDatabase = helper.writableDatabase;
+
+        val spinnerParent = findViewById<View>(R.id.spinner2) as Spinner;
+        val medicineNameItem = spinnerParent.selectedItem as String
+
+        db.delete("testdb", "name=?", arrayOf(medicineNameItem))
+    }
+
 
     /*薬の種類を返す関数*/
     fun medKindText() : String {
@@ -137,7 +181,56 @@ class MedicineRegistActivity : AppCompatActivity() {
     fun clear_mdicineInfo(edittext: EditText) {
         edittext.editableText.clear()
     }
+
+    /* DBからデータをすべて取得し薬のデータを配列にして返す関数*/
+    private fun medicineData_forRegist(): List<MedicineAllData_forRegist> {
+        val db: SQLiteDatabase = helper.readableDatabase;
+        val cursor: Cursor = db.query(
+            "testdb",
+            arrayOf("medicine", "value", "kind"),
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+        cursor.moveToFirst()
+
+        val medicineList = arrayListOf<MedicineAllData_forRegist>();
+
+        for (i in 1..cursor.count) {
+            medicineList.add(MedicineAllData_forRegist(cursor.getString(0), cursor.getInt(1), cursor.getString(2)))
+            cursor.moveToNext()
+        }
+
+        cursor.close()
+
+        return medicineList
+    }
+
+
+    fun medicineNameData_forRegist() : List<String> {
+        val medicineNameList = medicineData_forRegist().map { it.medicineName }
+        return medicineNameList
+    }
+
+    fun medicineValueData_forRegist() : List<Int> {
+        val medicineValueList = medicineData_forRegist().map { it.medicineValue }
+        return medicineValueList
+    }
+
+
+    /*spinnerにString型のArrayListをセットする関数*/
+    private fun setAdapter(spinner: Spinner, list: List<String>) {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter;
+    }
 }
+
+
+class MedicineAllData_forRegist(val medicineName: String, val medicineValue: Int, val medicineKind: String)
 
 
 

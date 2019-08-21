@@ -143,7 +143,7 @@
         </LinearLayout>
         <Space
                 android:layout_width="match_parent"
-                android:layout_height="10dp"/>
+                android:layout_height="50dp"/>
         <TextView
                 android:text="既存変更"
                 android:layout_width="match_parent"
